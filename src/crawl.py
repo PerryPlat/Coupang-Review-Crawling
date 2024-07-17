@@ -1,29 +1,49 @@
-import requests as rq
 from bs4 import BeautifulSoup as bs
-import time,os,re,json
-from typing import Union
-from config import headers
+from pathlib import Path
+from typing import Optional,Union,Dict,List
 from openpyxl import Workbook
+import time
+import os
+import re
+import requests as rq
+import json
+
+def get_headers(
+    key: str,
+    default_value: Optional[str] = None
+    )-> Dict[str,Dict[str,str]]:
+    """ Get Headers """
+    JSON_FILE : str = 'json/headers.json'
+
+    with open(JSON_FILE,'r',encoding='UTF-8') as file:
+        headers : Dict[str,Dict[str,str]] = json.loads(file.read())
+
+    try :
+        return headers[key]
+    except:
+        if default_value:
+            return default_value
+        raise EnvironmentError(f'Set the {key}')
 
 class Coupang:
     @staticmethod
     def get_product_code(url: str)-> str:
         """ 입력받은 URL 주소의 PRODUCT CODE 추출하는 메소드 """
-        prod_code = url.split('products/')[-1].split('?')[0]
+        prod_code : str = url.split('products/')[-1].split('?')[0]
         return prod_code
 
-    def __init__(self):
-        self.__headers = headers.get_headers(key='headers')
+    def __init__(self)-> None:
+        self.__headers : Dict[str,str] = get_headers(key='headers')
 
-    def main(self)-> list:
+    def main(self)-> List[List[Dict[str,Union[str,int]]]]:
         # URL 주소
-        URL = self.input_review_url()
+        URL : str = self.input_review_url()
 
         # URL의 Product Code 추출
-        prod_code = self.get_product_code(url=URL)
+        prod_code : str = self.get_product_code(url=URL)
 
         # URL 주소 재가공
-        URLS = [f'https://www.coupang.com/vp/product/reviews?productId={prod_code}&page={page}&size=5&sortBy=ORDER_SCORE_ASC&ratings=&q=&viRoleCode=3&ratingSummary=true' for page in range(1,self.input_page_count() + 1)]
+        URLS : List[str] = [f'https://www.coupang.com/vp/product/reviews?productId={prod_code}&page={page}&size=5&sortBy=ORDER_SCORE_ASC&ratings=&q=&viRoleCode=3&ratingSummary=true' for page in range(1,self.input_page_count() + 1)]
 
         # __headers에 referer 키 추가
         self.__headers['referer'] = URL
@@ -31,8 +51,13 @@ class Coupang:
         with rq.Session() as session:
             return [self.fetch(url=url,session=session) for url in URLS]
 
+<<<<<<< HEAD:crawl.py
     def fetch(self,url:str,session)-> list:
         save_data = []
+=======
+    def fetch(self,url:str,session)-> List[Dict[str,Union[str,int]]]:
+        save_data : List[Dict[str,Union[str,int]]] = list()
+>>>>>>> 09254af3d1a6caef55cdf4c1908e3387b904e864:src/crawl.py
 
         with session.get(url=url,headers=self.__headers) as response :
             html = response.text
@@ -42,7 +67,7 @@ class Coupang:
             article_lenth = len(soup.select('article.sdp-review__article__list'))
 
             for idx in range(article_lenth):
-                dict_data = dict()
+                dict_data : Dict[str,Union[str,int]] = dict()
                 articles = soup.select('article.sdp-review__article__list')
 
                 # 구매자 이름
@@ -101,21 +126,39 @@ class Coupang:
             time.sleep(1)
 
             return save_data
+    
+    @staticmethod
+    def clear_console() -> None:
+        command: str = 'clear'
+        if os.name in ('nt','dos'):
+            command = 'cls'
+        os.system(command=command)
 
     def input_review_url(self)-> str:
         while True:
+<<<<<<< HEAD:crawl.py
             os.system('clear')
             review_url = input('원하시는 상품의 URL 주소를 입력해주세요\n\nEx)\nhttps://www.coupang.com/vp/products/6850220949?itemId=16316652514&vendorItemId=73649818939&sourceType=srp_product_ads&clickEventId=c6095c12-9815-4219-b29f-a5781690dd66&korePlacement=15&koreSubPlacement=1&q=%EC%A1%B0%EB%A6%BD%EC%8B%9D+%EA%B0%80%EA%B5%AC&itemsCount=36&searchId=d3b9b2c3bd554323987f9d78b0bb15ac&rank=0&isAddedCart=\n\n:')
+=======
+            self.clear_console()
+            
+            # Review URL
+            review_url : str = input('원하시는 상품의 URL 주소를 입력해주세요\n\nEx)\nhttps://www.coupang.com/vp/products/7335597976?itemId=18741704367&vendorItemId=85873964906&q=%ED%9E%98%EB%82%B4%EB%B0%94+%EC%B4%88%EC%BD%94+%EC%8A%A4%EB%8B%88%EC%BB%A4%EC%A6%88&itemsCount=36&searchId=0c5c84d537bc41d1885266961d853179&rank=2&isAddedCart=\n\n:')
+>>>>>>> 09254af3d1a6caef55cdf4c1908e3387b904e864:src/crawl.py
             if not review_url :
-                os.system('clear')
+                # Window
+                os.system('cls')
+                # Mac
+                #os.system('clear')
                 print('URL 주소가 입력되지 않았습니다')
                 continue
             return review_url
 
     def input_page_count(self)-> int:
-        os.system('clear')
+        self.clear_console()
+
         while True:
-            page_count = input('페이지 수를 입력하세요\n\n:')
+            page_count : str = input('페이지 수를 입력하세요\n\n:')
             if not page_count:
                 print('페이지 수가 입력되지 않았습니다\n')
                 continue
@@ -124,9 +167,9 @@ class Coupang:
 
 class OpenPyXL:
     @staticmethod
-    def save_file():
+    def save_file()-> None:
         # 크롤링 결과
-        results : list = Coupang().main()
+        results : List[List[Dict[str,Union[str,int]]]] = Coupang().main()
 
         wb = Workbook()
         ws = wb.active
@@ -145,8 +188,8 @@ class OpenPyXL:
 
                 row += 1
 
-        savePath = os.path.abspath('쿠팡-상품리뷰-크롤링')
-        fileName = results[0][0]['prod_name'] + '.xlsx'
+        savePath : str = os.path.abspath('쿠팡-상품리뷰-크롤링')
+        fileName : str = results[0][0]['prod_name'] + '.xlsx'
 
         if not os.path.exists(savePath):
             os.mkdir(savePath)
