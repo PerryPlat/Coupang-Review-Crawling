@@ -32,7 +32,7 @@ class Coupang:
             return [self.fetch(url=url,session=session) for url in URLS]
 
     def fetch(self,url:str,session)-> list:
-        save_data = list()
+        save_data = []
 
         with session.get(url=url,headers=self.__headers) as response :
             html = response.text
@@ -80,10 +80,10 @@ class Coupang:
                 else:
                     review_content = re.sub('[\n\t]','',review_content.text.strip())
 
-                # 맛 만족도
+                # 제품 만족도
                 answer = articles[idx].select_one('span.sdp-review__article__list__survey__row__answer')
                 if answer == None or answer.text == '':
-                    answer = '맛 평가 없음'
+                    answer = '제품 평가 없음'
                 else:
                     answer = answer.text.strip()
 
@@ -105,7 +105,7 @@ class Coupang:
     def input_review_url(self)-> str:
         while True:
             os.system('clear')
-            review_url = input('원하시는 상품의 URL 주소를 입력해주세요\n\nEx)\nhttps://www.coupang.com/vp/products/6451503812?itemId=14007944553&vendorItemId=73528488680&sourceType=srp_product_ads&clickEventId=28aaab30-71e3-4f30-9059-07a29eb1b27f&korePlacement=15&koreSubPlacement=6&q=%EB%9E%A9%EB%85%B8%EC%89%AC&itemsCount=36&searchId=af6bda06076947a39f847ed86a718c34&rank=5&isAddedCart=\n\n:')
+            review_url = input('원하시는 상품의 URL 주소를 입력해주세요\n\nEx)\nhttps://www.coupang.com/vp/products/6850220949?itemId=16316652514&vendorItemId=73649818939&sourceType=srp_product_ads&clickEventId=c6095c12-9815-4219-b29f-a5781690dd66&korePlacement=15&koreSubPlacement=1&q=%EC%A1%B0%EB%A6%BD%EC%8B%9D+%EA%B0%80%EA%B5%AC&itemsCount=36&searchId=d3b9b2c3bd554323987f9d78b0bb15ac&rank=0&isAddedCart=\n\n:')
             if not review_url :
                 os.system('clear')
                 print('URL 주소가 입력되지 않았습니다')
@@ -130,7 +130,7 @@ class OpenPyXL:
 
         wb = Workbook()
         ws = wb.active
-        ws.append(['상품명','구매자 이름','구매자 평점','리뷰 제목','리뷰 내용','맛 만족도'])
+        ws.append(['상품명','구매자 이름','구매자 평점','리뷰 제목','리뷰 내용','제품 만족도'])
 
         row = 2
 
